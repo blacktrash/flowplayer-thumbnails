@@ -73,7 +73,7 @@
                     startIndex = typeof c.startIndex === 'number'
                         ? c.startIndex
                         : 1,
-                    thumb = c.lazyload && !sprite
+                    thumb = (c.lazyload && !sprite)
                         ? new Image()
                         : null,
                     preloadImages = function (max, start) {
