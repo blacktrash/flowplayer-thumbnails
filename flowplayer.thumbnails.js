@@ -101,25 +101,29 @@
                         delta = x - common.offset(timeline).left,
                         percentage = delta / common.width(timeline),
                         seconds = Math.round(percentage * api.video.duration),
+                        engineWidth = common.width(engine),
                         url,
                         displayThumb = function () {
-                            var scale = (c.responsive && common.hasClass(root, 'is-small'))
-                                    ? 0.7
-                                    : (c.responsive && common.hasClass(root, 'is-tiny'))
-                                        ? 0.6
-                                        : 1,
+                            var scale = (c.responsive && engineWidth < 600)
+                                    ? engineWidth / 600
+                                    : 1,
+                                scaledWidth = width * scale,
+                                scaledHeight = height * scale,
                                 css = {
-                                    width: (width * scale) + 'px',
-                                    height: (height * scale) + 'px',
+                                    width: scaledWidth + 'px',
+                                    height: scaledHeight + 'px',
                                     'background-image': "url('" + url + "')",
                                     'background-repeat': 'no-repeat',
                                     border: '1px solid #333',
                                     'text-shadow': '1px 1px #000'
                                 };
                             if (sprite) {
-                                var left = Math.floor(seconds % c.columns) * -width - (width - width * scale) / 2,
-                                    top = Math.floor(seconds / c.columns) * -height - (height - height * scale) / 2;
-                                css['background-position'] = left + 'px ' + top + 'px';
+                                var left = Math.floor(seconds % c.columns) * -scaledWidth,
+                                    top = Math.floor(seconds / c.columns) * -scaledHeight;
+                                extend(css, {
+                                    'background-position': left + 'px ' + top + 'px',
+                                    'background-size': (c.width * scale) + 'px ' + (c.height * scale) + 'px'
+                                });
                             } else {
                                 extend(css, {
                                     'background-size': 'cover',
