@@ -24,7 +24,6 @@
                 bean = flowplayer.bean,
                 extend = flowplayer.extend,
                 support = flowplayer.support,
-                timeline = common.find('.fp-timeline', root)[0],
                 timelineTooltip = common.find('.fp-time' + (flowplayer.version.indexOf('6.') === 0
                     ? 'line-tooltip'
                     : 'stamp'), root)[0];
@@ -77,6 +76,11 @@
                     thumb = (c.lazyload && !sprite)
                         ? new Image()
                         : null,
+                    textContent = function (el) {
+                        return el[(el.innerText !== undefined)
+                            ? 'innerText'
+                            : 'textContent'];
+                    },
                     preloadImages = function (max, start) {
                         max = Math.floor(max / interval + start);
                         function load() {
@@ -97,11 +101,9 @@
                     preloadImages(video.duration, startIndex);
                 }
 
-                bean.on(root, 'mousemove.thumbnails', '.fp-timeline', function (ev) {
-                    var x = ev.pageX || ev.clientX,
-                        delta = x - common.offset(timeline).left,
-                        percentage = delta / common.width(timeline),
-                        seconds = Math.round(percentage * api.video.duration),
+                bean.on(root, 'mousemove.thumbnails', '.fp-timeline', function () {
+                    var seconds = 0,
+                        timeArray = textContent(timelineTooltip).split(':'),
                         engineWidth = common.width(engine),
                         url,
                         displayThumb = function () {
@@ -133,6 +135,10 @@
                             }
                             common.css(timelineTooltip, css);
                         };
+
+                    timeArray.reverse().forEach(function (t, i) {
+                        seconds += parseInt(t, 10) * Math.pow(60, i);
+                    });
 
                     // 2nd condition safeguards at out of range retrieval attempts
                     if (seconds < 0 || seconds > Math.round(api.video.duration)) {
