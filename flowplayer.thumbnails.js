@@ -49,9 +49,10 @@
 
                 var c = extend({
                         lazyload: true,
-                        responsive: true
+                        responsive: 600
                     }, a.conf.thumbnails, video.thumbnails),
                     template = c.template,
+                    responsive = c.responsive,
                     sprite = template && template.indexOf('{time}') < 0;
 
                 if (!template || (sprite && (!c.rows || !c.columns || !c.width || !c.height))) {
@@ -104,8 +105,8 @@
                         engineWidth = common.width(engine),
                         url,
                         displayThumb = function () {
-                            var scale = (c.responsive && engineWidth < 600)
-                                    ? engineWidth / 600
+                            var scale = (responsive && engineWidth < responsive)
+                                    ? engineWidth / responsive
                                     : 1,
                                 scaledWidth = width * scale,
                                 scaledHeight = height * scale,
