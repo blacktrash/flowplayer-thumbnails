@@ -54,18 +54,14 @@
                     responsive = c.responsive,
                     sprite = template && template.indexOf('{time}') < 0;
 
-                if (!template || (sprite && (!c.rows || !c.columns || !c.width || !c.height))) {
+                if (!template || (sprite && (!c.width || !c.height))) {
                     return;
                 }
 
-                var height = sprite
-                        ? c.height / c.rows
-                        : c.height || 80,
+                var height = c.height || 80,
                     engine = common.find('.fp-engine', root)[0],
                     ratio = (video.height || common.height(engine)) / (video.width || common.width(engine)),
-                    width = sprite
-                        ? c.width / c.columns
-                        : height / ratio,
+                    width = c.width || height / ratio,
                     interval = c.interval || 1,
                     time_format = c.time_format || function (t) {
                         return t;
@@ -81,6 +77,8 @@
                             ? 'innerText'
                             : 'textContent'];
                     },
+                    imgWidth,
+                    imgHeight,
                     preloadImages = function (max, start) {
                         max = Math.floor(max / interval + start);
                         function load() {
@@ -90,18 +88,26 @@
                             var img = new Image();
                             img.src = template.replace('{time}', time_format(start));
                             bean.on(img, 'load', function () {
-                                start += 1;
-                                load();
+                                if (sprite) {
+                                    imgWidth = img.naturalWidth;
+                                    imgHeight = img.naturalHeight;
+                                } else {
+                                    start += 1;
+                                    load();
+                                }
                             });
                         }
                         load();
                     };
 
-                if (c.preload) {
+                if (c.preload || sprite) {
                     preloadImages(video.duration, startIndex);
                 }
 
                 bean.on(root, 'mousemove.thumbnails', '.fp-timeline', function () {
+                    if (sprite && !imgWidth) {
+                        return;
+                    }
                     var seconds = 0,
                         timeArray = textContent(timelineTooltip).split(':'),
                         engineWidth = common.width(engine),
@@ -121,11 +127,12 @@
                                     'text-shadow': '1px 1px #000'
                                 };
                             if (sprite) {
-                                var left = Math.floor(seconds % c.columns) * -scaledWidth,
-                                    top = Math.floor(seconds / c.columns) * -scaledHeight;
+                                var columns = imgWidth / width,
+                                    left = Math.floor(seconds % columns) * -scaledWidth,
+                                    top = Math.floor(seconds / columns) * -scaledHeight;
                                 extend(css, {
                                     'background-position': left + 'px ' + top + 'px',
-                                    'background-size': (c.width * scale) + 'px ' + (c.height * scale) + 'px'
+                                    'background-size': (imgWidth * scale) + 'px ' + (imgHeight * scale) + 'px'
                                 });
                             } else {
                                 extend(css, {
