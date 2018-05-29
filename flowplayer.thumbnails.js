@@ -3,7 +3,10 @@
 
 /*!
 
-   Thumbnail image plugin for Flowplayer HTML5
+   Sprite thumbnail image plugin for Flowplayer
+
+   Based on
+   https://github.com/flowplayer/flowplayer-thumbnails/
 
    Copyright (c) 2015-2017, Flowplayer Drive Oy
 
