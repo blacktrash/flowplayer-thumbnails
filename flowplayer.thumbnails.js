@@ -89,10 +89,10 @@
                             }
                             var img = new Image();
                             img.src = template.replace('{time}', time_format(start));
-                            img.onload = function () {
+                            bean.on(img, 'load', function () {
                                 start += 1;
                                 load();
-                            };
+                            });
                         }
                         load();
                     };
