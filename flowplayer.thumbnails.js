@@ -14,7 +14,7 @@
    http://www.opensource.org/licenses/mit-license.php
 
    requires:
-   - Flowplayer HTML5 version 6.x or greater
+   - Flowplayer HTML5 version 7.x or greater
    revision: $GIT_ID$
 
 */
@@ -27,9 +27,7 @@
                 bean = flowplayer.bean,
                 extend = flowplayer.extend,
                 support = flowplayer.support,
-                timelineTooltip = common.find('.fp-time' + (flowplayer.version.indexOf('6.') === 0
-                    ? 'line-tooltip'
-                    : 'stamp'), root)[0];
+                timeStamp = common.find('.fp-timestamp', root)[0];
 
             if (support.touch || !support.inlineVideo) {
                 return;
@@ -38,7 +36,7 @@
             api.on('ready', function (_ev, a, video) {
                 // cleanup
                 bean.off(root, '.thumbnails');
-                common.css(timelineTooltip, {
+                common.css(timeStamp, {
                     width: '',
                     height: '',
                     'background-image': '',
@@ -83,7 +81,7 @@
                         return;
                     }
                     var seconds = 0,
-                        timeArray = textContent(timelineTooltip).split(':'),
+                        timeArray = textContent(timeStamp).split(':'),
                         engineWidth = common.width(engine),
                         displayThumb = function () {
                             var scale = (responsive && engineWidth < responsive)
@@ -94,7 +92,7 @@
                                 columns = imgWidth / width,
                                 left = Math.floor(seconds % columns) * -scaledWidth,
                                 top = Math.floor(seconds / columns) * -scaledHeight;
-                            common.css(timelineTooltip, {
+                            common.css(timeStamp, {
                                 width: scaledWidth + 'px',
                                 height: scaledHeight + 'px',
                                 'background-image': "url('" + src + "')",

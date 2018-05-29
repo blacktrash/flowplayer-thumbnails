@@ -19,7 +19,7 @@
   },
   "homepage": "https://github.com/flowplayer/flowplayer-thumbnails",
   "peerDependencies": {
-    "flowplayer": "^6.0.3"
+    "flowplayer": "^7.0.0"
   },
   "devDependencies": {
     "jslint": "^0.12.0",
