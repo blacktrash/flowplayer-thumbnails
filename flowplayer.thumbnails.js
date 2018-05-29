@@ -50,122 +50,69 @@
                 });
 
                 var c = extend({
-                        lazyload: true,
                         responsive: 600
                     }, a.conf.thumbnails, video.thumbnails),
-                    template = c.template,
-                    responsive = c.responsive,
-                    sprite = template && template.indexOf('{time}') < 0;
+                    src = c.src,
+                    responsive = c.responsive;
 
-                if (!template || (sprite && (!c.width || !c.height))) {
+                if (!src || !c.width || !c.height) {
                     return;
                 }
 
-                var height = c.height || 80,
-                    engine = common.find('.fp-engine', root)[0],
-                    ratio = (video.height || common.height(engine)) / (video.width || common.width(engine)),
-                    width = c.width || height / ratio,
+                var height = c.height,
+                    width = c.width,
                     interval = c.interval || 1,
-                    time_format = c.time_format || function (t) {
-                        return t;
-                    },
-                    startIndex = typeof c.startIndex === 'number'
-                        ? c.startIndex
-                        : 1,
-                    thumb = (c.lazyload && !sprite)
-                        ? new Image()
-                        : null,
+                    engine = common.find('.fp-engine', root)[0],
+                    imgWidth,
+                    imgHeight,
+                    img = new Image(),
                     textContent = function (el) {
                         return el[(el.innerText !== undefined)
                             ? 'innerText'
                             : 'textContent'];
-                    },
-                    imgWidth,
-                    imgHeight,
-                    preloadImages = function (max, start) {
-                        max = Math.floor(max / interval + start);
-                        function load() {
-                            if (start > max) {
-                                return;
-                            }
-                            var img = new Image();
-                            img.src = template.replace('{time}', time_format(start));
-                            bean.on(img, 'load', function () {
-                                if (sprite) {
-                                    imgWidth = img.naturalWidth;
-                                    imgHeight = img.naturalHeight;
-                                } else {
-                                    start += 1;
-                                    load();
-                                }
-                            });
-                        }
-                        load();
                     };
 
-                if (c.preload || sprite) {
-                    preloadImages(video.duration, startIndex);
-                }
+                img.src = src;
+                bean.on(img, 'load', function () {
+                    imgWidth = img.naturalWidth;
+                    imgHeight = img.naturalHeight;
+                });
 
                 bean.on(root, 'mousemove.thumbnails', '.fp-timeline', function () {
-                    if (sprite && !imgWidth) {
+                    if (!imgWidth) {
                         return;
                     }
                     var seconds = 0,
                         timeArray = textContent(timelineTooltip).split(':'),
                         engineWidth = common.width(engine),
-                        url,
                         displayThumb = function () {
                             var scale = (responsive && engineWidth < responsive)
                                     ? engineWidth / responsive
                                     : 1,
                                 scaledWidth = width * scale,
                                 scaledHeight = height * scale,
-                                css = {
-                                    width: scaledWidth + 'px',
-                                    height: scaledHeight + 'px',
-                                    'background-image': "url('" + url + "')",
-                                    'background-repeat': 'no-repeat',
-                                    border: '1px solid #333',
-                                    'text-shadow': '1px 1px #000'
-                                };
-                            if (sprite) {
-                                var columns = imgWidth / width,
-                                    left = Math.floor(seconds % columns) * -scaledWidth,
-                                    top = Math.floor(seconds / columns) * -scaledHeight;
-                                extend(css, {
-                                    'background-position': left + 'px ' + top + 'px',
-                                    'background-size': (imgWidth * scale) + 'px ' + (imgHeight * scale) + 'px'
-                                });
-                            } else {
-                                extend(css, {
-                                    'background-size': 'cover',
-                                    'background-position': 'center'
-                                });
-                            }
-                            common.css(timelineTooltip, css);
+                                columns = imgWidth / width,
+                                left = Math.floor(seconds % columns) * -scaledWidth,
+                                top = Math.floor(seconds / columns) * -scaledHeight;
+                            common.css(timelineTooltip, {
+                                width: scaledWidth + 'px',
+                                height: scaledHeight + 'px',
+                                'background-image': "url('" + src + "')",
+                                'background-repeat': 'no-repeat',
+                                border: '1px solid #333',
+                                'text-shadow': '1px 1px #000',
+                                'background-position': left + 'px ' + top + 'px',
+                                'background-size': (imgWidth * scale) + 'px ' + (imgHeight * scale) + 'px'
+                            });
                         };
 
                     timeArray.reverse().forEach(function (t, i) {
                         seconds += parseInt(t, 10) * Math.pow(60, i);
                     });
-
-                    // 2nd condition safeguards at out of range retrieval attempts
-                    if (seconds < 0 || seconds > Math.round(api.video.duration)) {
-                        return;
-                    }
                     // enables greater interval than one second between thumbnails
                     seconds = Math.floor(seconds / interval);
 
-                    // {time} template expected to start at 1, video time/first frame starts at 0
-                    url = template.replace('{time}', time_format(seconds + startIndex));
-
-                    if (c.lazyload && !sprite) {
-                        thumb.src = url;
-                        bean.on(thumb, 'load', displayThumb);
-                    } else {
-                        displayThumb();
-                    }
+                    displayThumb();
                 });
             });
 
